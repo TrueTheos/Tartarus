@@ -53,6 +53,7 @@ Hey I contain top secret message!
 After running zwc decode:
 Hey I contain top secret message! It's me - secret message
 ```
+(You might see some weird symbols in the terminal after pasting message containing zero width characters but don't worry - they are invisible in other apps)
 
 ## Contributing
 We would love to have you help me with the development of Tartarus. Each and every contribution is greatly valued! Contact me via Discord - Theos#2613
