@@ -29,3 +29,30 @@ $ git clone https://github.com/Loiuy123/Tartarus.git
 # change the working directory to tartarus
 # cd tartarus
 ```
+
+## Usage
+
+```console
+$python tartarus.py
+commands:
+  help - List of all commands with descriptions
+  zwc - Hidden messages using Zero Width Characters
+  siEncode - Steganography; Hide message in image
+  siCheck - Steganography Check; Look for hidden message in image
+  pipMerge - Merge two images into one
+  pipUnmerge - Unmerge images
+```
+
+## Zero Width Characters
+
+Hide or extract hidden message made out of zero with characters:
+```
+Message before: 
+Hey I contain top secret message!
+
+After running zwc decode:
+Hey I contain top secret message! It's me - secret message
+```
+
+## Contributing
+We would love to have you help me with the development of Tartarus. Each and every contribution is greatly valued! Contact me via Discord - Theos#2613
