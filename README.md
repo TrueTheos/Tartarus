@@ -7,6 +7,16 @@
   <a target="_blank" href="LICENSE" title="License: GPL-3.0"><img src="https://img.shields.io/badge/License-GMT3.0-blue.svg"></a>
  </p>
  
+## Features
+**Tartarus** allows you to:
+- Make invisible text inside messages using zero width characters
+- Hide messages inside image's metadata
+- Look for hidden messages inside image's metdata
+- Merge two images into one
+- Unmerge images and reveal hidden image
+
+More in the future!
+ 
 ## Steganography
 
 Let’s understand what is steganography.
