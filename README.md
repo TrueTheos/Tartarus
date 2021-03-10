@@ -7,6 +7,12 @@
   <a target="_blank" href="LICENSE" title="License: GPL-3.0"><img src="https://img.shields.io/badge/License-GMT3.0-blue.svg"></a>
  </p>
  
- <p align="center">
-**Tartarus** is a private *Steganography* tool. It allows You to hide content inside images and text.
-  </p>
+## Installation
+
+```console
+# clone the repo
+$ git clone https://github.com/Loiuy123/Tartarus.git
+
+# change the working directory to tartarus
+# cd tartarus
+```
