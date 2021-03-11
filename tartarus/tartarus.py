@@ -50,7 +50,6 @@ def help():
     print(f"{YELLOW}pip_merge{RESET} - Merge two images into one (For best result use PNG " +
         "with opaque background).")
     print(f"{YELLOW}pip_unmerge{RESET} - Unmerge images.")
-    print(f"{YELLOW}zwc{RESET} - Hidden messages using zero-width characters.")
 
 
 tartarus_ascii()
@@ -352,7 +351,7 @@ def image_encode():
     newimg.save(new_img_name, str(new_img_name.split(".")[1].upper()))
 
     print(f"{GREEN}[+]{RESET} "
-        "Successfully created new image with hidden message. {GREEN}[+]{RESET}")
+        f"Successfully created new image with hidden message. {GREEN}[+]{RESET}")
 
 
 def image_decode():
@@ -386,7 +385,7 @@ def image_decode():
                 return
             else:
                 print(f"{GREEN}[+]{RESET} Image does not contain any encoded message. "
-                    "{data} {GREEN}[+]{RESET}")
+                    f"{data} {GREEN}[+]{RESET}")
                 return
 
 
