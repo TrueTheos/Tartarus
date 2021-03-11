@@ -51,7 +51,13 @@ commands:
   siCheck - Steganography Check; Look for hidden message in image
   pipMerge - Merge two images into one
   pipUnmerge - Unmerge images
+  swEncode - Encode text inside of wav file
+  swRecover - Recover text from the wav file
 ```
+
+## WAV Steganography
+
+Secret to be known to recover data from the steganographic output is the number of LSBs used and the number of bytes hidden.
 
 ## Zero Width Characters
 

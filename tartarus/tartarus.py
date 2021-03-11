@@ -1,6 +1,9 @@
 import os
 import subprocess as subp
 import tkinter as tk
+import wave
+import math
+import struct
 
 import colorama
 import pyperclip
@@ -30,6 +33,17 @@ zero_space_symbols = [
     ZERO_WIDTH_JOINER,
     ]
 
+_sound = None
+num_lsb = 0
+params = None
+num_channels = None
+sample_width = None
+n_frames = None
+n_samples = 0
+fmt = None
+smallest_byte = None
+mask = None
+
 
 def tartarus_ascii():
     """Print the app's title screen."""
@@ -50,7 +64,8 @@ def help():
     print(f"{YELLOW}pip_merge{RESET} - Merge two images into one (For best result use PNG " +
         "with opaque background).")
     print(f"{YELLOW}pip_unmerge{RESET} - Unmerge images.")
-
+    print(f"{YELLOW}swEncode{RESET} - Encode text inside of wav file.")
+    print(f"{YELLOW}swRecover{RESET} - Recover text from the wav file.")
 
 tartarus_ascii()
 
@@ -115,6 +130,162 @@ def hidden_message():
     elif option == 2:
         print(f"{GREEN}[+]{RESET} Decoded Message:  " + decode_text())
 
+
+# STEGANOGRAPHY - WAV #
+
+def prepare():
+    global _sound, num_lsb, params, num_channels, sample_width, n_frames, n_samples, fmt, smallest_byte, mask
+
+    root = tk.Tk()
+    root.withdraw()
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter carrier wav name (with extension): ", 
+        end="", flush=True)
+    print('', end="")
+    sound = filedialog.askopenfilename()
+    print(sound)
+
+    num_lsb = int(input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter number of LSBs to use: "))
+
+    _sound = wave.open(sound, "r")
+
+    params = _sound.getparams()
+    num_channels = _sound.getnchannels()
+    sample_width = _sound.getsampwidth()
+    n_frames = _sound.getnframes()
+    n_samples = n_frames * num_channels
+
+    if (sample_width == 1): 
+        fmt = "{}B".format(n_samples)
+        mask = (1 << 8) - (1 << num_lsb)
+        smallest_byte = -(1 << 8)
+    elif (sample_width == 2): 
+        fmt = "{}h".format(n_samples)
+        mask = (1 << 15) - (1 << num_lsb)
+        smallest_byte = -(1 << 15)
+    else:
+        raise ValueError("File has an unsupported bit-depth")
+
+
+def hide_data():
+    """Encode text inside of WAV file"""
+    prepare()
+
+    max_bytes_to_hide = (n_samples * num_lsb) // 8
+
+    root = tk.Tk()
+    root.withdraw()
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter name of text file containing data to enocode (with extension): ", 
+        end="", flush=True)
+    print('', end="")
+    data = filedialog.askopenfilename()
+    print(data)
+
+    filesize = os.stat(data).st_size
+
+    if (filesize > max_bytes_to_hide):
+        required_LSBs = math.ceil(filesize * 8 / n_samples)
+        raise ValueError("Input file too large to hide, "
+                         "requires {} LSBs, using {}"
+                         .format(required_LSBs, num_lsb))
+    
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET}" + " Using {} B out of {} B".format(filesize, max_bytes_to_hide))
+
+    raw_data = list(struct.unpack(fmt, _sound.readframes(n_frames)))
+    _sound.close()
+
+    input_data = memoryview(open(data, "rb").read())
+
+    data_index = 0
+    sound_index = 0
+
+    values = []
+    buffer = 0
+    buffer_length = 0
+    done = False
+
+    while(not done):
+        while (buffer_length < num_lsb and data_index // 8 < len(input_data)):
+            buffer += (input_data[data_index // 8] >> (data_index % 8)
+                        ) << buffer_length
+            bits_added = 8 - (data_index % 8)
+            buffer_length += bits_added
+            data_index += bits_added
+            
+        current_data = buffer % (1 << num_lsb)
+        buffer >>= num_lsb
+        buffer_length -= num_lsb
+
+        while (sound_index < len(raw_data) and
+               raw_data[sound_index] == smallest_byte):
+
+            values.append(struct.pack(fmt[-1], raw_data[sound_index]))
+            sound_index += 1
+
+        if (sound_index < len(raw_data)):
+            current_sample = raw_data[sound_index]
+            sound_index += 1
+
+            sign = 1
+            if (current_sample < 0):
+                current_sample = -current_sample
+                sign = -1
+
+            altered_sample = sign * ((current_sample & mask) | current_data)
+
+            values.append(struct.pack(fmt[-1], altered_sample))
+
+        if (data_index // 8 >= len(input_data) and buffer_length <= 0):
+            done = True
+        
+    while(sound_index < len(raw_data)):
+        # At this point, there's no more data to hide. So we append the rest of
+        # the samples from the original sound file.
+        values.append(struct.pack(fmt[-1], raw_data[sound_index]))
+        sound_index += 1
+    
+    output_path = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter name of the output wav (with extension): ")
+    sound_steg = wave.open(output_path, "w")
+    sound_steg.setparams(params)
+    sound_steg.writeframes(b"".join(values))
+    sound_steg.close()
+    print(f"{GREEN}[+]{RESET} Data hidden over " + "{} audio file.".format(output_path))
+
+
+def recover_data():
+    """Recover text encoded inside of WAV file"""
+    prepare()
+
+    raw_data = list(struct.unpack(fmt, _sound.readframes(n_frames)))
+    mask = (1 << num_lsb) - 1
+    output_path = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter name of the output text file (with extension): ")
+    output_file = open(output_path, "wb+")
+
+    bytes_to_recover = int(input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter number of bytes to recover: "))
+
+    data = bytearray()
+    sound_index = 0 
+    buffer = 0
+    buffer_length = 0
+    _sound.close()
+
+    while (bytes_to_recover > 0):
+        
+        next_sample = raw_data[sound_index]
+        if (next_sample != smallest_byte):
+            buffer += (abs(next_sample) & mask) << buffer_length
+            buffer_length += num_lsb
+        sound_index += 1
+        
+        while (buffer_length >= 8 and bytes_to_recover > 0):
+            current_data = buffer % (1 << 8)
+            buffer >>= 8
+            buffer_length -= 8
+            data += struct.pack('1B', current_data)
+            bytes_to_recover -= 1
+
+    output_file.write(bytes(data))
+    output_file.close()
+    print(f"{GREEN}[+]{RESET} Data recovered to" + " {} text file".format(output_path))
 
 # PICTURE IN PICTURE #
 
@@ -331,7 +502,7 @@ def encode_enc(newimg, data):
 
 
 def image_encode():
-    """Docstring TODO"""
+    """Encode text inside of image's metadata"""
     img = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter image name (with extension): ")
     try:
         image = Image.open(img, 'r')
@@ -355,7 +526,7 @@ def image_encode():
 
 
 def image_decode():
-    """Docstring TODO"""
+    """Decode text from image's metadata"""
     img = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter image name (with extension): ")
     try:
         image = Image.open(img, 'r')
@@ -403,5 +574,9 @@ while True:
         pip_merge()
     if cmd_splitted[0] == "pip_unmerge":
         pip_unmerge()
+    if cmd_splitted[0] == "swEncode":
+        hide_data()
+    if cmd_splitted[0] == "swRecover":
+        recover_data()
     if cmd_splitted[0] == "help":
         help()
