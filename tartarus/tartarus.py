@@ -11,6 +11,8 @@ import pyperclip
 from PIL import Image
 from tkinter import filedialog
 
+colorama.init()
+
 GREEN = colorama.Fore.GREEN
 GRAY = colorama.Fore.LIGHTBLACK_EX
 RESET = colorama.Fore.RESET
@@ -44,9 +46,9 @@ fmt = None
 smallest_byte = None
 mask = None
 
-
 def tartarus_ascii():
     """Print the app's title screen."""
+    print("")
     print(f"\n{RED}  _____  _    ____ _____  _    ____  _   _ ____ {RESET}")
     print(f"{RED} |_   _|/ \  |  _ \_   _|/ \  |  _ \| | | / ___| {RESET}")
     print(f"{RED}   | | / _ \ | |_) || | / _ \ | |_) | | | \___ \ {RESET}")
@@ -68,7 +70,6 @@ def help():
 
 tartarus_ascii()
 
-
 # ZERO WIDTH CHARACTERS #
 
 def to_base(num, b, numerals='0123456789abcdefghijklmnopqrstuvwxyz'):
@@ -79,7 +80,8 @@ def to_base(num, b, numerals='0123456789abcdefghijklmnopqrstuvwxyz'):
 
 def encode_text():
     """Requests input string, encodes, then copies encoded text to clipboard."""
-    message = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter message to encode: ")
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter message to encode: ", end="")
+    message = input()
     encoded = LEFT_TO_RIGHT_MARK
     for message_char in message:
         code = '{0}{1}'.format('0' * padding, int(str(to_base(
@@ -97,7 +99,8 @@ def encode_text():
 
 def decode_text():
     """Requests encoded text, then displays decoded text."""
-    message = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter message to decode: ")
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter message to decode: ", end="")
+    message = input()
     extract_encoded_message = message.split(LEFT_TO_RIGHT_MARK)[1]
     message = extract_encoded_message
     extract_encoded_message = message.split(RIGHT_TO_LEFT_MARK)[0]
@@ -122,8 +125,9 @@ def decode_text():
 def hidden_message():
     """Launches text encoding or decoding."""
     print("")
-    option = int(input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} "
-        "Choose ZWC option (1 - Encode / 2 - Decode): ").lower())
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} "
+        "Choose ZWC option (1 - Encode / 2 - Decode): ", end="")
+    option = int(input().lower())
     if option == 1:
         encode_text()
     elif option == 2:
@@ -242,7 +246,8 @@ def hide_data():
         values.append(struct.pack(fmt[-1], raw_data[sound_index]))
         sound_index += 1
     
-    output_path = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter name of the output wav (with extension): ")
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter name of the output wav (with extension): ", end="")
+    output_path = input()
     sound_steg = wave.open(output_path, "w")
     sound_steg.setparams(params)
     sound_steg.writeframes(b"".join(values))
@@ -256,10 +261,12 @@ def recover_data():
 
     raw_data = list(struct.unpack(fmt, _sound.readframes(n_frames)))
     mask = (1 << num_lsb) - 1
-    output_path = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter name of the output text file (with extension): ")
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter name of the output text file (with extension): ", end="")
+    output_path = input()
     output_file = open(output_path, "wb+")
 
-    bytes_to_recover = int(input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter number of bytes to recover: "))
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter number of bytes to recover: ", end="")
+    bytes_to_recover = int(input())
 
     data = bytearray()
     sound_index = 0 
@@ -502,22 +509,25 @@ def encode_enc(newimg, data):
 
 def image_encode():
     """Encode text inside of image's metadata"""
-    img = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter image name (with extension): ")
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter image name (with extension): ", end="")
+    img = input()
     try:
         image = Image.open(img, 'r')
     except:
         print(f"{RED}[!]{RESET} Can't find image. {RED}[!]{RESET}")
         return
 
-    data = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter data to be encoded : ")
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter data to be encoded : ", end="")
+    data = input()
     if len(data) == 0:
         raise ValueError('Data is empty')
 
     newimg = image.copy()
     encode_enc(newimg, data)
 
-    new_img_name = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} "
-        "Enter the name of new image (with extension): ")
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} "
+        "Enter the name of new image (with extension): ", end="")
+    new_img_name = input()
     newimg.save(new_img_name, str(new_img_name.split(".")[1].upper()))
 
     print(f"{GREEN}[+]{RESET} "
@@ -526,7 +536,8 @@ def image_encode():
 
 def image_decode():
     """Decode text from image's metadata"""
-    img = input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter image name (with extension): ")
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter image name (with extension): ", end="")
+    img = input()
     try:
         image = Image.open(img, 'r')
     except:
@@ -561,7 +572,8 @@ def image_decode():
 
 if __name__ == '__main__':
     while True:
-        command = input(f"\n{RED}Tartarus: {RESET}")
+        print(f'\n{RED}Tartarus: {RESET}', end='')
+        command = input()
         cmd_splitted = command.split(' ', 1)
 
         if cmd_splitted[0] == "zwc":
