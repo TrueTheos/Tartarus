@@ -14,6 +14,7 @@
 - Look for hidden messages inside image's metdata
 - Merge two images into one
 - Unmerge images and reveal hidden image
+- Hide and reveal data in WAV files
 
 More in the future!
  
