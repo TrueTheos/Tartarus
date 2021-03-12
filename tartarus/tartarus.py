@@ -47,7 +47,6 @@ mask = None
 
 def tartarus_ascii():
     """Print the app's title screen."""
-    print(os.system('cls||clear'))
     print(f"\n{RED}  _____  _    ____ _____  _    ____  _   _ ____ {RESET}")
     print(f"{RED} |_   _|/ \  |  _ \_   _|/ \  |  _ \| | | / ___| {RESET}")
     print(f"{RED}   | | / _ \ | |_) || | / _ \ | |_) | | | \___ \ {RESET}")
@@ -560,23 +559,24 @@ def image_decode():
                 return
 
 
-while True:
-    command = input(f"\n{RED}Tartarus: {RESET}")
-    cmd_splitted = command.split(' ', 1)
+if __name__ == '__main__':
+    while True:
+        command = input(f"\n{RED}Tartarus: {RESET}")
+        cmd_splitted = command.split(' ', 1)
 
-    if cmd_splitted[0] == "zwc":
-        hidden_message()
-    if cmd_splitted[0] == "siEncode":
-        image_encode()
-    if cmd_splitted[0] == "siCheck":
-        image_decode()
-    if cmd_splitted[0] == "pip_merge":
-        pip_merge()
-    if cmd_splitted[0] == "pip_unmerge":
-        pip_unmerge()
-    if cmd_splitted[0] == "swEncode":
-        hide_data()
-    if cmd_splitted[0] == "swRecover":
-        recover_data()
-    if cmd_splitted[0] == "help":
-        help()
+        if cmd_splitted[0] == "zwc":
+            hidden_message()
+        if cmd_splitted[0] == "siEncode":
+            image_encode()
+        if cmd_splitted[0] == "siCheck":
+            image_decode()
+        if cmd_splitted[0] == "pip_merge":
+            pip_merge()
+        if cmd_splitted[0] == "pip_unmerge":
+            pip_unmerge()
+        if cmd_splitted[0] == "swEncode":
+            hide_data()
+        if cmd_splitted[0] == "swRecover":
+            recover_data()
+        if cmd_splitted[0] == "help":
+            help()
