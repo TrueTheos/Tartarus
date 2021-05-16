@@ -11,6 +11,7 @@ import pyperclip
 from PIL import Image
 from tkinter import filedialog
 
+
 colorama.init()
 
 GREEN = colorama.Fore.GREEN
@@ -147,7 +148,8 @@ def prepare():
     sound = filedialog.askopenfilename()
     print(sound)
 
-    num_lsb = int(input(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter number of LSBs to use: "))
+    print(f"{YELLOW}[{MIDDLE_DOT}]{RESET} Enter number of LSBs to use: ", end="")
+    num_lsb = int(input())
 
     _sound = wave.open(sound, "r")
 
